@@ -1,0 +1,206 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+class Type {
+    virtual void getType() = 0;
+    virtual void print() = 0;
+} ;
+
+class Feature : public Type {
+    string summary ;
+    string impact ;
+    public:
+    Feature() {
+        summary = "";
+        impact = "low";
+    }
+
+    Feature(string taskSummary , string taskImpact) {
+        summary = taskSummary;
+        impact = taskImpact;
+    }
+
+    Feature getType() {
+        return this;
+    }
+
+    void print() {
+        cout << "Feature : " ;
+        cout << summary << " " << impact << endl;
+    }
+};
+
+class Bug : public Type {
+    string severity ;
+    public :
+    Bug () {
+        severity = "low";
+    }
+
+    Bug(string level) {
+        severity = level ;
+    }
+
+    Bug getType() {
+        return this;
+    }
+    void print() {
+        cout << "Bug : " ;
+        cout << severity << endl;
+    }
+} ;
+
+
+class Story : public Type {
+    string summary ;
+    unsgined int points ; 
+    public:
+
+    Story() {
+        summary = "";
+        points = 0;
+    }
+
+    Story(String summaryStory, int pointsStory) {
+        summary = summaryStory;
+        points = pointsStory;
+    }
+
+    Story getType() {
+        return this;
+    }  
+     void print() {
+        cout << "Story : " ;
+       cout << summary << " " << points << endl;
+    }
+} ;
+
+
+class Task {
+    string title;
+    string creator;
+    string assignee;
+    string status;
+    Type* type;
+    string date;
+
+    /**
+    TO DO: add getter and setter
+    **/
+    public:
+    Task() {
+        title = "";
+        creator = "";
+        assignee = "";
+        status = "";
+        type = nullptr;
+        date = "00-00-0000";
+    }
+
+    // constructer
+
+    Task(string taskTitle, string taskCreator, string taskAssignee,
+     string taskStatus, string taskType, string taskDate) {
+        title = taskTitle,
+        creator = taskCreator;
+        assignee = taskAssignee;
+        status = taskStatus;
+        if(taskType == "bug") {
+            type = new Bug();
+        } else if(taskType == "story") {
+            type = new Story();
+        } else {
+            type = new Feature();
+        }
+        date = taskDate;
+    }
+
+    // print task
+    printTask() {
+        
+        type->print();
+    }
+
+} ;
+
+
+
+map<string, Task> allTasks;
+map<string , set<string>> sprint; // set of taskTitle
+map<string, string> taskToSprintMapping; // taskTitle to sprint mapping
+map<string , set<string>> users; // unique taskTitle assigned to a user
+
+Task createTask() {
+    Task *task = new Task("Create Dashboard" , "Brad" , "Peter" , "Open" , "Feature" "2019-04-12");
+    return *task;
+}
+
+void modifyTaskStatus(string taskTitle) {
+    string newStatus;
+    cin >> newStatus ;
+    allTasks[taskTitle].status = newStatus;
+}
+
+void modifyTaskAssignee(string taskTitle) {
+    string newAssignee;
+    cin >> newAssignee;
+    allTasks[taskTitle].assignee = newAssignee;
+}
+
+void displayUserTasks(string userName) {
+    set<string> &taskTitle = users[userName];
+    for(auto title : taskTitle) {
+        allTasks[title].printTask();
+    }
+}
+
+void modifyTaskSprint(string taskTitle) {
+    string toSprint; // the sprint on which we want to move the current task
+    cin >> toSprint;
+    string &currentSprint = taskToSprintMapping[taskTitle];
+    //removing old task from previous sprint board
+    sprint[currentSprint].erase(taskTitle);
+
+    // adding new task
+    taskToSprintMapping[taskTitle] = toSprint;
+    sprint[toSprint].insert(taskTitle);
+}
+
+void printSprint(string sprintName) {
+    set<string> &taskCurrentSprint = sprint[sprintName];
+    for(auto task : taskCurrentSprint) {
+        task.printTask();
+    }
+}
+
+int main() {
+    // new task, any type
+    Task task = createTask() ;
+    allTasks[task.title] = Task;
+    string currentSprint = "" ; cin >> currentSprint;
+
+    //create sprint and add task to a sprint board 
+    sprint[currentSprint].insert(task.title);
+    taskToSprintMapping[task] = currentSprint;
+
+    //assign task to as user
+    users[task.assignee].insert(task.title);
+
+    //modify status
+    string taskTitle ; cin >> taskTitle ;
+    modifyTaskStatus(taskTitle);
+
+    //modify assingee
+    modifyTaskAssignee(taskTitle);
+
+    //display task assigned to a user
+    string userName ; cin >> userName;
+    displayUserTasks(userName);
+
+    //move task to another sprint
+    modifyTaskSprint() ;
+
+    //print all task with their status in given Sprint
+    string sprintName;  cin >> sprintName ;
+    printSprint(sprintName);
+}
